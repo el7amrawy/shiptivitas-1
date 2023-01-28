@@ -10,6 +10,7 @@ export default class Board extends React.Component {
     super(props);
     const clients = this.getClients();
     this.state = {
+      data: clients,
       clients: {
         backlog: clients.filter(
           (client) => !client.status || client.status === "backlog"
@@ -157,6 +158,21 @@ export default class Board extends React.Component {
     for (const lane in this.swimlanes) {
       lanes.push(this.swimlanes[lane].current);
     }
-    dragula(lanes);
+    dragula(lanes).on("drop", (el, target, source) => {
+      const targetName = target.previousSibling.textContent
+        .split(" ")
+        .join("-")
+        .toLocaleLowerCase();
+      const id = el.attributes.getNamedItem("data-id").textContent;
+      this.setState((oldState) => {
+        oldState.data.map((item) => {
+          if (item.id === id) {
+            item.status = targetName;
+          }
+          return item;
+        });
+        return oldState;
+      });
+    });
   }
 }
